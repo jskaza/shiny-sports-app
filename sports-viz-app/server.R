@@ -1,26 +1,22 @@
 # server.R
 
+setwd("~/Documents/github/shiny-sports-app")
+
 library(hexbin)
-#library(rje)
-#library(RColorBrewer)
-#library(MASS)
-#library(scatterplot3d)
-#library(beeswarm)
-#library(lattice)
 library(ggplot2)
 library(corrplot)
 
 # load and process hr_data 
-hr_data = read.csv("~/Documents/github/shiny-sports-app/hr_data.csv")
+hr_data = read.csv("hr_data.csv")
 # data processing for corrplot
 hr = hr_data
 hr$hitter = NULL
 hr$pitcher = NULL
 hr_cor = cor(hr)
 
-coaches = read.csv("~/Documents/github/shiny-sports-app/nfl_coaches.csv")
+coaches = read.csv("nfl_coaches.csv")
 coaches = coaches[coaches$g > 49,]
-coaches = coaches[coaches$poff_g > 5,]
+coaches = coaches[coaches$poff_g > 4,]
 coaches$sb[is.na(coaches$sb)] = 0 # change NA to 0
 
 
@@ -123,7 +119,7 @@ shinyServer(
      )
    
    # download dataset
-   output$downloadData <- downloadHandler(
+   output$downloadhrData <- downloadHandler(
      filename = function() {"hr_data.csv"},
      content = function(file) {
        write.csv(hr_data, file)
@@ -155,7 +151,14 @@ shinyServer(
          facet_grid(facets = play_ind ~ reg_ind, labeller=label_parsed, scales = ifelse(
            input$scales == "Fixed", "fixed", "free"))
      # missing jim harbaugh and george halas overlap
-       
    })
+       
+   # download dataset
+   output$downloadcoachData = downloadHandler(
+     filename = function() {"coaches.csv"},
+     content = function(file) {
+       write.csv(coaches, file)
+     }
+   )
      
   })

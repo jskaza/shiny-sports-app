@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[192]:
+# In[1]:
 
 import numpy as np
 import pandas as pd
@@ -10,18 +10,18 @@ from bs4 import BeautifulSoup
 import urllib2
 
 
-# In[193]:
+# In[2]:
 
 soup = BeautifulSoup(urllib2.urlopen('http://www.pro-football-reference.com/coaches/', timeout = 60).read(), 'html.parser') # read-in website
 
 
-# In[194]:
+# In[3]:
 
 my_table = soup('table')[0] # table 0 has coaching data
 rows = my_table.findChildren(['tr'])
 
 
-# In[255]:
+# In[4]:
 
 rows_no_head = [item for index, item in enumerate(rows) if index % 31 != 0]
 print "The NFL Coaching data has", len(rows_no_head), "rows"
@@ -66,22 +66,22 @@ for i in range(len(rows_no_head)):
                 data[key][i] = float(data[key][i])
 
 
-# In[256]:
+# In[5]:
 
 df = pd.DataFrame(data)
 
 
-# In[257]:
-
-df.head()
-
-
-# In[258]:
+# In[7]:
 
 df.to_csv("nfl_coaches.csv", index=False)
 
 
-# In[ ]:
+# In[8]:
 
 print "nfl_coaches.csv updated"
+
+
+# In[ ]:
+
+
 

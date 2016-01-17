@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 import numpy as np
 import pandas as pd
@@ -10,20 +10,20 @@ from bs4 import BeautifulSoup
 import urllib2
 
 
-# In[2]:
+# In[4]:
 
 soup = BeautifulSoup(urllib2.urlopen('http://www.hittrackeronline.com/index.php?perpage=10000', timeout = 60).read(), 'html.parser') # read-in website
 print "MLB HR soup created"
 
 
-# In[3]:
+# In[5]:
 
 my_table = soup('table')[16] # table 16 has 2015 season hrs 
 rows = my_table.findChildren(['tr'])
 print "The MLB HR data has", len(rows), "rows"
 
 
-# In[4]:
+# In[6]:
 
 data = {'hitter': [], # hitter name
         'pitcher': [], # pitcher name
@@ -96,14 +96,9 @@ df.apply (lambda row: flip_horiz(row),axis=1)
 df['horiz_flipped'] = df.apply (lambda row: flip_horiz(row),axis=1)
 
 
-# In[14]:
-
-#plot(df['horiz_flipped'], df['horiz'])
-
-
 # In[15]:
 
-df.to_csv("hr_data.csv", index=False)
+df.to_csv("hr_data_2015.csv", index=False)
 
 
 # In[16]:
