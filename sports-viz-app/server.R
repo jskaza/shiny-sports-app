@@ -1,29 +1,42 @@
 # server.R
 
-setwd("~/Documents/github/shiny-sports-app")
-
 library(hexbin)
 library(ggplot2)
 library(corrplot)
 
 # load and process hr_data 
-hr_data = read.csv("hr_data.csv")
+hr_data_itp = read.csv("data/hr_data_2015.csv") # all hrs, inlcuding itp
+hr_data = hr_data_itp[ which(hr_data_itp$class != "ITP/L"), ] # df w/o itp
+hr_data_itp$class = NULL # don't need to display this variable, just used for identifying itp
+hr_data$class = NULL # don't need to display this variable, just used for identifying itp
 # data processing for corrplot
+hr = hr_data_itp
+hr$hitter = NULL
+hr$pitcher = NULL
+hr$class = NULL
+hr_itp_cor = cor(hr)
 hr = hr_data
 hr$hitter = NULL
 hr$pitcher = NULL
+hr$class = NULL
 hr_cor = cor(hr)
 
-coaches = read.csv("nfl_coaches.csv")
+coaches = read.csv("data/nfl_coaches.csv")
 coaches = coaches[coaches$g > 49,]
 coaches = coaches[coaches$poff_g > 4,]
 coaches$sb[is.na(coaches$sb)] = 0 # change NA to 0
 
 
 shinyServer(
-  function(input, output) { 
+  function(input, output) {
     
    output$plot = renderPlot({
+     
+     if (input$itp == TRUE){
+       hr_data = hr_data_itp
+     } else {
+       hr_data = hr_data
+     }
       
       x = switch(input$x_var,
                  "Speed"=hr_data$speed,
@@ -83,13 +96,19 @@ shinyServer(
    
    
    output$hist_x= renderPlot({
+     if (input$itp == TRUE){
+       hr_data = hr_data_itp
+     } else {
+       hr_data = hr_data
+     }
      
      x = switch(input$x_hist,
                 "Speed"=hr_data$speed,
                 "True Dist"=hr_data$dist,
                 "Apex"=hr_data$apex,
                 "Elev Angle"=hr_data$elev,
-                "Horiz Angle"=hr_data$horiz)
+                "Horiz Angle"=hr_data$horiz,
+                "Horiz Angle (Flipped)"=hr_data$horiz_flipped)
      
      qplot(x, xlab = input$x_hist, ylab = "Frequency", alpha=I(.25), binwidth = input$bins,
            col = I("black")) + 
@@ -97,14 +116,22 @@ shinyServer(
    })
    
    output$corr= renderPlot({
-     
-     corrplot.mixed(hr_cor, upper="circle", lower="number")
+     if (input$itp == TRUE){
+       corrplot.mixed(hr_itp_cor, upper="circle", lower="number")
+     }
+   else {corrplot.mixed(hr_cor, upper="circle", lower="number")
+   }
    })
      
      
    
    # table of player home runs
    output$table = renderDataTable({
+     if (input$itp == TRUE){
+       hr_data = hr_data_itp
+     } else {
+       hr_data = hr_data
+     }
      data=NULL
      if (input$player != "All"){
        data = hr_data[hr_data$hitter == input$player,]
@@ -122,7 +149,7 @@ shinyServer(
    output$downloadhrData <- downloadHandler(
      filename = function() {"hr_data.csv"},
      content = function(file) {
-       write.csv(hr_data, file)
+       write.csv(hr_data_itp, file)
      }
    )
    

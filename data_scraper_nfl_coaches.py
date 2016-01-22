@@ -73,7 +73,7 @@ df = pd.DataFrame(data)
 
 # In[7]:
 
-df.to_csv("nfl_coaches.csv", index=False)
+df.to_csv("sports-viz-app/data/nfl_coaches.csv", index=False)
 
 
 # In[8]:

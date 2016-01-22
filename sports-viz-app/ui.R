@@ -1,16 +1,14 @@
 # ui.R
 
-setwd("~/Documents/github/shiny-sports-app")
-
 library(shinythemes)
 library(markdown)
 
-hr_data = read.csv("hr_data.csv")
+hr_data = read.csv("data/hr_data_2015.csv")
 #hr_data = hr_data[hr_data$dist > 0,] # remove 0 distances (missing data indicator)
 today = format(Sys.Date(), format="%B %d %Y")
 #attach(hr_data)
 
-coaches = read.csv("nfl_coaches.csv")
+coaches = read.csv("data/nfl_coaches.csv")
 coaches = coaches[coaches$g > 49,]
 coaches = coaches[coaches$poff_g > 5,]
 coaches$sb[is.na(coaches$sb)] = 0 # change NA to 0
@@ -52,6 +50,10 @@ shinyUI(navbarPage("Sports Viz", theme = shinytheme("spacelab"),
           ),
               p(a("Click here", href = "http://www.hittrackeronline.com/glossary.php", target="_blank"), 
                 "for variable descriptions"),
+          conditionalPanel(
+            condition = "input.tabs != 'Info'",
+            checkboxInput("itp", "Add inside-the-park home runs", value = FALSE)
+          ),
           conditionalPanel(condition = "input.tabs=='Scatter Plots' | input.tabs =='Table'",
               selectInput("x_var", "X", c("Speed", "True Dist", "Apex", "Elev Angle", "Horiz Angle", 
                                           "Horiz Angle (Flipped)"), selected = "Speed"),
@@ -78,7 +80,7 @@ shinyUI(navbarPage("Sports Viz", theme = shinytheme("spacelab"),
           conditionalPanel(
             condition = "input.tabs=='Histograms'",
             h4("Select Variable"),
-            selectInput("x_hist", label = NULL, c("Speed", "True Dist", "Apex", "Elev Angle", "Horiz Angle"), selected = "Speed"),
+            selectInput("x_hist", label = NULL, c("Speed", "True Dist", "Apex", "Elev Angle", "Horiz Angle", "Horiz Angle (Flipped)"), selected = "Speed"),
             sliderInput("bins", "Binwidth", min=1, max=20, value=1, step = .5)
           )
         ),
@@ -89,9 +91,9 @@ shinyUI(navbarPage("Sports Viz", theme = shinytheme("spacelab"),
             tabPanel("Histograms", plotOutput("hist_x")),
             tabPanel("Correlations", plotOutput("corr")),
             tabPanel("Info",
-                     p("The Home Run data featured in this application are made available by the", a("ESPN Stats & Information
+                     p("The home run data featured in this application correspond to the 2015 season and are made available by the", a("ESPN Stats & Information
                Group", href="http://espn.go.com/blog/statsinfo/category/_/name/mlb-2", target="_blank"),
-                       "and were scraped from", a("hittrackeronline.com", href="http://www.hittrackeronline.com/",
+                       ". They were scraped from", a("hittrackeronline.com", href="http://www.hittrackeronline.com/",
                                                  target="_blank"),"."),
                      p("The data can be downloaded directly as a csv file by clicking the Download Button below."),
                      br(),

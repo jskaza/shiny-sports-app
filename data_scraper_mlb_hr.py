@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[3]:
+# In[18]:
 
 import numpy as np
 import pandas as pd
@@ -10,23 +10,24 @@ from bs4 import BeautifulSoup
 import urllib2
 
 
-# In[4]:
+# In[19]:
 
 soup = BeautifulSoup(urllib2.urlopen('http://www.hittrackeronline.com/index.php?perpage=10000', timeout = 60).read(), 'html.parser') # read-in website
 print "MLB HR soup created"
 
 
-# In[5]:
+# In[20]:
 
 my_table = soup('table')[16] # table 16 has 2015 season hrs 
 rows = my_table.findChildren(['tr'])
 print "The MLB HR data has", len(rows), "rows"
 
 
-# In[6]:
+# In[21]:
 
 data = {'hitter': [], # hitter name
         'pitcher': [], # pitcher name
+        'class': [], # hr classification
         'dist': [], # hr dist
         'speed': [], # speed off bat
         'apex': [], # hit apex
@@ -34,8 +35,8 @@ data = {'hitter': [], # hitter name
         'horiz': [] # horizontal angle
         }
 
-keys = ['hitter', 'pitcher', 'dist', 'speed', 'apex', 'elev', 'horiz'] # need this because keys data.keys() prints in strange order
-cols = [3, 5, 10, 11, 14, 12, 13]
+keys = ['hitter', 'pitcher', 'class', 'dist', 'speed', 'apex', 'elev', 'horiz'] # need this because keys data.keys() prints in strange order
+cols = [3, 5, 9, 10, 11, 14, 12, 13]
 
 size = 50 # set sample size
 sample = random.sample(xrange(3, len(rows)-2), size)
@@ -45,10 +46,9 @@ for i in range(3,len(rows)-2): # get the full dataset
     x=rows[i]
     for key, col in zip(keys, cols):
         data[key].append(x.findAll('td')[col])
-            #data[key].append(soup('table')[16].findAll('tr')[i].findAll('td')[col])
 
 
-# In[5]:
+# In[22]:
 
 # cleanup data
 floats = ['apex', 'dist', 'elev', 'horiz', 'speed'] # floats
@@ -61,21 +61,21 @@ for i in range(0,len(data['hitter'])):
         data[flo][i] = float(data[flo][i])
 
 
-# In[6]:
+# In[23]:
 
 # change names to First Last
 data['hitter'] = [h.split(',')[1] + " " + h.split(',')[0] for h in data['hitter']]
 data['pitcher'] = [p.split(',')[1] + " " + p.split(',')[0] for p in data['pitcher']]
 
 
-# In[7]:
+# In[24]:
 
 df = pd.DataFrame(data)
 print "The number of missings is", df.count()["hitter"] - df[df.dist > 0].count()["hitter"] 
 df = df[df.dist != 0] # remove row if dist == 0
 
 
-# In[10]:
+# In[25]:
 
 def flip_horiz(row):
     if row['horiz'] > 90:
@@ -86,22 +86,22 @@ def flip_horiz(row):
         return 90
 
 
-# In[11]:
+# In[26]:
 
 df.apply (lambda row: flip_horiz(row),axis=1)
 
 
-# In[12]:
+# In[27]:
 
 df['horiz_flipped'] = df.apply (lambda row: flip_horiz(row),axis=1)
 
 
-# In[15]:
+# In[28]:
 
-df.to_csv("hr_data_2015.csv", index=False)
+df.to_csv("sports-viz-app/data/hr_data_2015.csv", index=False)
 
 
-# In[16]:
+# In[29]:
 
 print "hr_data.csv updated"
 
